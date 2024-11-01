@@ -1,4 +1,4 @@
-# mls_project
+# sagemaker_penguin_classifier
 
 A short description of the project.
 
@@ -22,5 +22,5 @@ A short description of the project.
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/yourusername/mls_project.git
-cd mls_project
+git clone https://github.com/Punchyou/sagemaker_penguin_classifier.git
+cd sagemaker_penguin_classifier
