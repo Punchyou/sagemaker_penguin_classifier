@@ -8,8 +8,12 @@ from aws_infra_config import get_sagemaker_config
 import logging
 from pathlib import Path
 
+from src.preprocessor import preprocess_and_save_data
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+DATA_DIR = Path("data")
 
 
 def get_sagemaker_session():
@@ -54,6 +58,9 @@ def get_region():
 
 def main():
     logger.info("Starting the SageMaker application")
+
+    preprocess_and_save_data(data_dir=DATA_DIR)
+
     sagemaker_config = get_sagemaker_config()
     sagemaker_session = get_sagemaker_session()
     sagemaker_client = get_sagemaker_client()
