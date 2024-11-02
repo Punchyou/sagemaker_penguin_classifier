@@ -13,9 +13,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 
-DATA_DIR = Path("data")
-DATA_FILEPATH = Path("data") / "penguins.csv"
-
 
 def get_root_dir() -> Path:
     """
@@ -303,12 +300,3 @@ def preprocess_and_save_data(
         y_test,
     )
     save_model(data_dir, target_transformer, features_transformer)
-
-
-def main():
-    # TODO: to delete
-    preprocess_and_save_data(data_dir=DATA_DIR)
-
-
-if __name__ == "__main__":
-    main()
