@@ -17,6 +17,11 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 def get_root_dir() -> Path:
     """
     Returns the root directory of the project.
+
+    Returns
+    -------
+    Path
+        The root directory of the project.
     """
     if "__file__" in globals():
         return Path(__file__).resolve().parent.parent
@@ -24,9 +29,19 @@ def get_root_dir() -> Path:
         return Path.cwd()
 
 
-def get_data_from_file(data_filepath):
+def get_data_from_file(data_filepath) -> pd.DataFrame:
     """
-    This function reads the data from the penguins.csv file.
+    Reads the data from the specified CSV file.
+
+    Parameters
+    ----------
+    data_filepath : str
+        The relative path to the CSV file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The data read from the CSV file.
     """
     root = get_root_dir()
     path = root / data_filepath
@@ -42,9 +57,17 @@ def initialize_transformers(
     """
     Initialize and return the target and feature transformers.
 
-    Returns:
-        tuple: A tuple containing the target transformer and
-        the features transformer.
+    Parameters
+    ----------
+    target_column : str
+        The name of the target column.
+    features_columns : List[str], optional
+        The list of feature columns. Defaults to ["island"].
+
+    Returns
+    -------
+    Tuple[ColumnTransformer, ColumnTransformer]
+        A tuple containing the target transformer and the features transformer.
     """
     target_transformer = ColumnTransformer(
         transformers=[(target_column, OrdinalEncoder(), [0])]
@@ -81,15 +104,22 @@ def transform_target(
     """
     Transform the target variable.
 
-    Args:
-        target_transformer (ColumnTransformer): The transformer for the target
-        variable.
-        df_train (pd.DataFrame): The training dataframe.
-        df_validation (pd.DataFrame): The validation dataframe.
-        df_test (pd.DataFrame): The test dataframe.
+    Parameters
+    ----------
+    target_transformer : ColumnTransformer
+        The transformer for the target variable.
+    df_train : pd.DataFrame
+        The training dataframe.
+    df_validation : pd.DataFrame
+        The validation dataframe.
+    df_test : pd.DataFrame
+        The test dataframe.
 
-    Returns:
-        tuple: A tuple containing the transformed target variables for training, validation, and test sets.
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray]
+        A tuple containing the transformed target variables for training,
+        validation, and test sets.
     """
     y_train = target_transformer.fit_transform(
         np.array(df_train.species.values).reshape(-1, 1)
@@ -112,14 +142,21 @@ def drop_target(
     """
     Drop the target column from the dataframes.
 
-    Args:
-        df_train (pd.DataFrame): The training dataframe.
-        df_validation (pd.DataFrame): The validation dataframe.
-        df_test (pd.DataFrame): The test dataframe.
-        column_name (str): The name of the target column to drop.
+    Parameters
+    ----------
+    df_train : pd.DataFrame
+        The training dataframe.
+    df_validation : pd.DataFrame
+        The validation dataframe.
+    df_test : pd.DataFrame
+        The test dataframe.
+    column_name : str
+        The name of the target column to drop.
 
-    Returns:
-        tuple: A tuple containing the dataframes without the target column.
+    Returns
+    -------
+    Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        A tuple containing the dataframes without the target column.
     """
 
     df_train = df_train.drop(column_name, axis=1)
@@ -128,18 +165,27 @@ def drop_target(
     return df_train, df_validation, df_test
 
 
-def transform_features(features_transformer, df_train, df_validation, df_test):
+def transform_features(
+    features_transformer, df_train, df_validation, df_test
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Transform the features.
 
-    Args:
-        features_transformer (ColumnTransformer): The transformer for the features.
-        df_train (pd.DataFrame): The training dataframe.
-        df_validation (pd.DataFrame): The validation dataframe.
-        df_test (pd.DataFrame): The test dataframe.
+    Parameters
+    ----------
+    features_transformer : ColumnTransformer
+        The transformer for the features.
+    df_train : pd.DataFrame
+        The training dataframe.
+    df_validation : pd.DataFrame
+        The validation dataframe.
+    df_test : pd.DataFrame
+        The test dataframe.
 
-    Returns:
-        tuple: A tuple containing the transformed features for training, validation, and test sets.
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray]
+        A tuple containing the transformed features for training, validation, and test sets.
     """
     X_train = features_transformer.fit_transform(df_train)
     X_validation = features_transformer.transform(df_validation)
@@ -147,9 +193,19 @@ def transform_features(features_transformer, df_train, df_validation, df_test):
     return X_train, X_validation, X_test
 
 
-def split_data(df):
+def split_data(df) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
-    Splits the data into three sets: train, validation and test.
+    Splits the data into three sets: train, validation, and test.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input dataframe.
+
+    Returns
+    -------
+    Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        A tuple containing the training, validation, and test dataframes.
     """
 
     df_train, temp = train_test_split(df, test_size=0.3)
@@ -160,9 +216,17 @@ def split_data(df):
 
 def save_baselines(base_directory, df_train, df_test):
     """
-    During the data and quality monitoring steps, we will need baselines
-    to compute constraints and statistics. This function saves the
-    untransformed data to disk so we can use them as baselines later.
+    Save the untransformed data to disk for use as baselines during data and
+    quality monitoring steps.
+
+    Parameters
+    ----------
+    base_directory : str
+        The base directory to save the baselines.
+    df_train : pd.DataFrame
+        The training dataframe.
+    df_test : pd.DataFrame
+        The test dataframe.
     """
 
     for split, data in [("train", df_train), ("test", df_test)]:
@@ -171,10 +235,8 @@ def save_baselines(base_directory, df_train, df_test):
 
         df = data.copy().dropna()
 
-        # We want to save the header only for the train baseline
-        # but not for the test baseline. We'll use the test baseline
-        # to generate predictions later, and we can't have a header line
-        # because the model won't be able to make a prediction for it.
+        # Save the header only for the train baseline.
+        # Exclude the header for the test baseline to avoid prediction issues.
         header = split == "train"
         df.to_csv(
             baseline_path / f"{split}-baseline.csv", header=header, index=False
@@ -189,10 +251,27 @@ def save_splits(
     y_validation,
     X_test,
     y_test,
-):
+) -> None:
     """
-    This function concatenates the transformed features and the target
-    variable, and saves each one of the split sets to disk.
+    Concatenate the transformed features and the target variable, and save
+    each one of the split sets to disk.
+
+    Parameters
+    ----------
+    base_directory : str
+        The base directory to save the splits.
+    X_train : np.ndarray
+        The transformed training features.
+    y_train : np.ndarray
+        The transformed training target.
+    X_validation : np.ndarray
+        The transformed validation features.
+    y_validation : np.ndarray
+        The transformed validation target.
+    X_test : np.ndarray
+        The transformed test features.
+    y_test : np.ndarray
+        The transformed test target.
     """
 
     train = np.concatenate((X_train, y_train), axis=1)
@@ -218,12 +297,22 @@ def save_splits(
     )
 
 
-def save_model(base_directory, target_transformer, features_transformer):
+def save_model(
+    base_directory, target_transformer, features_transformer
+) -> None:
     """
-    This function creates a model.tar.gz file that contains the two
-    transformation pipelines we built to transform the data.
-    """
+    Create a model.tar.gz file that contains the two transformation pipelines
+    used to transform the data.
 
+    Parameters
+    ----------
+    base_directory : str
+        The base directory to save the model.
+    target_transformer : ColumnTransformer
+        The transformer for the target variable.
+    features_transformer : ColumnTransformer
+        The transformer for the features.
+    """
     with tempfile.TemporaryDirectory() as directory:
         joblib.dump(
             target_transformer, os.path.join(directory, "target.joblib")
@@ -250,14 +339,16 @@ def save_model(base_directory, target_transformer, features_transformer):
 
 def preprocess_and_save_data(
     data_dir: str,
-):
+) -> None:
     """
-    This function loads the supplied data, splits it, and transforms it.
+    Load the supplied data, split it, and transform it.
+    Save the processed data and models to disk.
 
-    Args:
-        df (pd.DataFrame): The input dataframe.
-        base_directory (str): The base directory to save the processed data
-        and models.
+    Parameters
+    ----------
+    data_dir : str
+        The directory containing the input data and where the processed data
+        and models will be saved.
     """
 
     data_path = Path(data_dir) / "penguins.csv"
