@@ -20,8 +20,10 @@ def get_sagemaker_session():
     """
     Initialize and return a SageMaker session.
 
-    Returns:
-        sagemaker.session.Session: A SageMaker session object.
+    Returns
+    -------
+    sagemaker.session.Session
+        A SageMaker session object.
     """
     return sagemaker.session.Session()
 
@@ -30,8 +32,10 @@ def get_sagemaker_client():
     """
     Initialize and return a SageMaker client.
 
-    Returns:
-        boto3.client: A SageMaker client object.
+    Returns
+    -------
+    boto3.client
+        A SageMaker client object.
     """
     return boto3.client("sagemaker")
 
@@ -40,8 +44,10 @@ def get_iam_client():
     """
     Initialize and return an IAM client.
 
-    Returns:
-        boto3.client: An IAM client object.
+    Returns
+    -------
+    boto3.client:
+        An IAM client object.
     """
     return boto3.client("iam")
 
@@ -50,8 +56,10 @@ def get_region():
     """
     Get the AWS region name.
 
-    Returns:
-        str: The AWS region name.
+    Returns
+    -------
+    str:
+        The AWS region name.
     """
     return boto3.Session().region_name
 
