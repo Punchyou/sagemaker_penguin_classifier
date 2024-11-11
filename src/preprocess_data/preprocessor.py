@@ -13,39 +13,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 
-
-def get_root_dir() -> Path:
-    """
-    Returns the root directory of the project.
-
-    Returns
-    -------
-    Path
-        The root directory of the project.
-    """
-    if "__file__" in globals():
-        return Path(__file__).resolve().parent.parent
-    else:
-        return Path.cwd()
-
-
-def get_data_from_file(data_filepath) -> pd.DataFrame:
-    """
-    Reads the data from the specified CSV file.
-
-    Parameters
-    ----------
-    data_filepath : str
-        The relative path to the CSV file.
-
-    Returns
-    -------
-    pd.DataFrame
-        The data read from the CSV file.
-    """
-    root = get_root_dir()
-    path = root / data_filepath
-    return pd.read_csv(path)
+from utils.general_utils import get_data_from_file
 
 
 def initialize_transformers(
@@ -185,7 +153,8 @@ def transform_features(
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        A tuple containing the transformed features for training, validation, and test sets.
+        A tuple containing the transformed features for training, validation,
+        and test sets.
     """
     X_train = features_transformer.fit_transform(df_train)
     X_validation = features_transformer.transform(df_validation)
