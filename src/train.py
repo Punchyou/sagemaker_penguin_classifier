@@ -1,11 +1,7 @@
-import os
-import argparse
-import logging
 import numpy as np
 import pandas as pd
 import fire
 
-from datetime import datetime
 from pathlib import Path
 from sklearn.metrics import accuracy_score
 

@@ -4,7 +4,6 @@ from src.constants import (
     TRAIN_CSV_PATH,
     VALIDATION_CSV_PATH,
     MODEL_FILENAME,
-    TRAIN_FILENAME,
 )
 
 from sagemaker.workflow.steps import TrainingStep

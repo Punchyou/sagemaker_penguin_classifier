@@ -13,7 +13,7 @@ import logging
 
 from constants import AWS_ROLE, LOCAL_MODE, IS_APPLE_M_CHIP, DATA_DIR
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 

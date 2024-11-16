@@ -2,9 +2,22 @@ from sagemaker.sklearn.processing import SKLearnProcessor
 from sagemaker.workflow.steps import CacheConfig
 from constants import (
     DATASET_LOCATION,
+    INPUT_DIR,
+    MODEL_FILENAME,
     PREPROCESSING_FILENAME,
     S3_LOCATION,
+    S3_MODEL_DESTINATION,
+    S3_TEST_BASELINE_DATA_DESTINATION,
+    S3_TEST_DATA_DESTINATION,
+    S3_TRAIN_BASELINE_DATA_DESTINATION,
+    S3_TRAIN_DATA_DESTINATION,
+    S3_VALIDATION_DATA_DESTINATION,
     SAGEMAKER_SESSION_CONFIG,
+    TEST_BASELINE_CSV_PATH,
+    TEST_CSV_PATH,
+    TRAIN_BASELINE_CSV_PATH,
+    TRAIN_CSV_PATH,
+    VALIDATION_CSV_PATH,
 )
 from sagemaker.workflow.steps import ProcessingStep
 from sagemaker.processing import ProcessingInput, ProcessingOutput
@@ -76,40 +89,42 @@ def setup_preprocessing_step(role: str):
             code=str(PREPROCESSING_FILENAME),
             inputs=[
                 ProcessingInput(
-                    source=DATASET_LOCATION,
-                    destination="/opt/ml/processing/input",
+                    # s3 location of the data
+                    source=DATASET_LOCATION.default_value,
+                    # where the data will be downloaded for development
+                    destination=INPUT_DIR,
                 ),
             ],
             outputs=[
                 ProcessingOutput(
                     output_name="train",
-                    source="/opt/ml/processing/train",
-                    destination=f"{S3_LOCATION}/preprocessing/train",
+                    source=TRAIN_CSV_PATH,
+                    destination=S3_TRAIN_DATA_DESTINATION,
                 ),
                 ProcessingOutput(
                     output_name="validation",
-                    source="/opt/ml/processing/validation",
-                    destination=f"{S3_LOCATION}/preprocessing/validation",
+                    source=VALIDATION_CSV_PATH,
+                    destination=S3_VALIDATION_DATA_DESTINATION,
                 ),
                 ProcessingOutput(
                     output_name="test",
-                    source="/opt/ml/processing/test",
-                    destination=f"{S3_LOCATION}/preprocessing/test",
+                    source=TEST_CSV_PATH,
+                    destination=S3_TEST_DATA_DESTINATION,
                 ),
                 ProcessingOutput(
                     output_name="model",
-                    source="/opt/ml/processing/model",
-                    destination=f"{S3_LOCATION}/preprocessing/model",
+                    source=MODEL_FILENAME,
+                    destination=S3_MODEL_DESTINATION,
                 ),
                 ProcessingOutput(
                     output_name="train-baseline",
-                    source="/opt/ml/processing/train-baseline",
-                    destination=f"{S3_LOCATION}/preprocessing/train-baseline",
+                    source=TRAIN_BASELINE_CSV_PATH,
+                    destination=S3_TRAIN_BASELINE_DATA_DESTINATION,
                 ),
                 ProcessingOutput(
                     output_name="test-baseline",
-                    source="/opt/ml/processing/test-baseline",
-                    destination=f"{S3_LOCATION}/preprocessing/test-baseline",
+                    source=TEST_BASELINE_CSV_PATH,
+                    destination=S3_TEST_BASELINE_DATA_DESTINATION,
                 ),
             ],
         ),
