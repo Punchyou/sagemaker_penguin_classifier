@@ -33,7 +33,7 @@ PREPROCESSING_FILENAME = "preprocess_data/preprocessor.py"
 AWS_ROLE = os.getenv("AWS_ROLE")
 SAGEMAKER_SESSION_CONFIG = {
     "framework_version": "1.2-1",
-    "instance_type": "ml.m5.xlarge",
+    "instance_type": "ml.m5.large",
     "instance_count": 1,
     "session": Session(),
 }
