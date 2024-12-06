@@ -13,7 +13,39 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 
-from utils.general_utils import get_data_from_file
+
+def get_root_dir() -> Path:
+    """
+    Returns the root directory of the project.
+
+    Returns
+    -------
+    Path
+        The root directory of the project.
+    """
+    if "__file__" in globals():
+        return Path(__file__).resolve().parent.parent
+    else:
+        return Path.cwd()
+
+
+def get_data_from_file(data_filepath) -> pd.DataFrame:
+    """
+    Reads the data from the specified CSV file.
+
+    Parameters
+    ----------
+    data_filepath : str
+        The relative path to the CSV file.
+
+    Returns
+    -------
+    pd.DataFrame
+        The data read from the CSV file.
+    """
+    root = get_root_dir()
+    path = root / data_filepath
+    return pd.read_csv(path)
 
 
 def initialize_transformers(
@@ -207,9 +239,7 @@ def save_baselines(base_directory, df_train, df_test):
         # Save the header only for the train baseline.
         # Exclude the header for the test baseline to avoid prediction issues.
         header = split == "train"
-        df.to_csv(
-            baseline_path / f"{split}-baseline.csv", header=header, index=False
-        )
+        df.to_csv(baseline_path / f"{split}-baseline.csv", header=header, index=False)
 
 
 def save_splits(
@@ -255,20 +285,14 @@ def save_splits(
     validation_path.mkdir(parents=True, exist_ok=True)
     test_path.mkdir(parents=True, exist_ok=True)
 
-    pd.DataFrame(train).to_csv(
-        train_path / "train.csv", header=False, index=False
-    )
+    pd.DataFrame(train).to_csv(train_path / "train.csv", header=False, index=False)
     pd.DataFrame(validation).to_csv(
         validation_path / "validation.csv", header=False, index=False
     )
-    pd.DataFrame(test).to_csv(
-        test_path / "test.csv", header=False, index=False
-    )
+    pd.DataFrame(test).to_csv(test_path / "test.csv", header=False, index=False)
 
 
-def save_model(
-    base_directory, target_transformer, features_transformer
-) -> None:
+def save_model(base_directory, target_transformer, features_transformer) -> None:
     """
     Create a model.tar.gz file that contains the two transformation pipelines
     used to transform the data.
@@ -283,19 +307,13 @@ def save_model(
         The transformer for the features.
     """
     with tempfile.TemporaryDirectory() as directory:
-        joblib.dump(
-            target_transformer, os.path.join(directory, "target.joblib")
-        )
-        joblib.dump(
-            features_transformer, os.path.join(directory, "features.joblib")
-        )
+        joblib.dump(target_transformer, os.path.join(directory, "target.joblib"))
+        joblib.dump(features_transformer, os.path.join(directory, "features.joblib"))
 
         model_path = Path(base_directory) / "model"
         model_path.mkdir(parents=True, exist_ok=True)
 
-        with tarfile.open(
-            f"{str(model_path / 'model.tar.gz')}", "w:gz"
-        ) as tar:
+        with tarfile.open(f"{str(model_path / 'model.tar.gz')}", "w:gz") as tar:
             tar.add(
                 os.path.join(directory, "target.joblib"),
                 arcname="target.joblib",
@@ -327,9 +345,7 @@ def preprocess_and_save_data(
         target_column="species"
     )
 
-    df_train_baseline, df_validation_baseline, df_test_baseline = split_data(
-        df
-    )
+    df_train_baseline, df_validation_baseline, df_test_baseline = split_data(df)
 
     y_train, y_validation, y_test = transform_target(
         target_transformer,
