@@ -1,4 +1,8 @@
-from sagemaker.sklearn.processing import SKLearnProcessor
+import os
+import logging
+import sagemaker
+from sagemaker.sklearn import SKLearn
+from sagemaker.processing import FrameworkProcessor, ProcessingInput, ProcessingOutput
 from sagemaker.workflow.steps import CacheConfig
 from constants import (
     DATASET_LOCATION,
@@ -23,10 +27,12 @@ from sagemaker.workflow.steps import ProcessingStep
 from sagemaker.processing import ProcessingInput, ProcessingOutput
 
 
-class SKLearnProcessorWrapper:
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class FrameworkProcessorWrapper:
     def __init__(self, role: str):
         """
-        Initialize the SKLearnProcessorWrapper with the given role.
+        Initialize the FrameworkProcessorWrapper with the given role.
 
         Parameters
         ----------
@@ -38,7 +44,7 @@ class SKLearnProcessorWrapper:
 
     def get_config(self):
         """
-        Get the configuration settings for the SKLearnProcessor.
+        Get the configuration settings for the FrameworkProcessor.
 
         Returns
         -------
@@ -47,23 +53,25 @@ class SKLearnProcessorWrapper:
         """
         return SAGEMAKER_SESSION_CONFIG
 
-    def create_processor(self) -> SKLearnProcessor:
+    def create_processor(self) -> FrameworkProcessor:
         """
-        Create and return an SKLearnProcessor. The SKLearnProcessor handles
+        Create and return a FrameworkProcessor. The FrameworkProcessor handles
         Amazon SageMaker processing.
 
         Returns
         -------
-        SKLearnProcessor
-            The SKLearnProcessor.
+        FrameworkProcessor
+            The FrameworkProcessor.
         """
-        return SKLearnProcessor(
-            base_job_name="preprocess-data",
-            framework_version=self.config["framework_version"],
+        return FrameworkProcessor(
+            framework_version="0.23-1",
+            image_uri="763104351884.dkr.ecr.us-west-2.amazonaws.com/sagemaker-scikit-learn:0.23-1-cpu-py3",
+            role=self.role,
             instance_type=self.config["instance_type"],
             instance_count=self.config["instance_count"],
-            role=self.role,
             sagemaker_session=self.config["session"],
+            base_job_name="preprocess-data",
+            estimator_cls=SKLearn
         )
 
 
@@ -80,14 +88,23 @@ def setup_preprocessing_step(role: str):
     # Configure caching
     cache_config = CacheConfig(enable_caching=True, expire_after="15d")
 
-    processor = SKLearnProcessorWrapper(role)
-    process_creator = processor.create_processor()
+    processor = FrameworkProcessor(
+        estimator_cls=SKLearn,
+        framework_version="1.2-1",
+        role=role,
+        instance_type="ml.m5.large",
+        instance_count=1,
+    )
+    # processor = FrameworkProcessorWrapper(role)
+    # process_creator = processor.create_processor()
 
     return ProcessingStep(
         name="preprocess-data",
-        step_args=process_creator.run(
-            code=str(PREPROCESSING_FILENAME),
-            inputs=[
+        step_args=processor.run(
+            code="preprocessor.py",
+            source_dir="preprocess_data",
+            dependencies=["constants.py"],),
+        inputs=[
                 ProcessingInput(
                     # s3 location of the data
                     source=DATASET_LOCATION.default_value,
@@ -95,38 +112,38 @@ def setup_preprocessing_step(role: str):
                     destination=INPUT_DIR,
                 ),
             ],
-            outputs=[
-                ProcessingOutput(
-                    output_name="train",
-                    source=TRAIN_CSV_PATH,
-                    destination=S3_TRAIN_DATA_DESTINATION,
-                ),
-                ProcessingOutput(
-                    output_name="validation",
-                    source=VALIDATION_CSV_PATH,
-                    destination=S3_VALIDATION_DATA_DESTINATION,
-                ),
-                ProcessingOutput(
-                    output_name="test",
-                    source=TEST_CSV_PATH,
-                    destination=S3_TEST_DATA_DESTINATION,
-                ),
-                ProcessingOutput(
-                    output_name="model",
-                    source=MODEL_FILENAME,
-                    destination=S3_MODEL_DESTINATION,
-                ),
-                ProcessingOutput(
-                    output_name="train-baseline",
-                    source=TRAIN_BASELINE_CSV_PATH,
-                    destination=S3_TRAIN_BASELINE_DATA_DESTINATION,
-                ),
-                ProcessingOutput(
-                    output_name="test-baseline",
-                    source=TEST_BASELINE_CSV_PATH,
-                    destination=S3_TEST_BASELINE_DATA_DESTINATION,
-                ),
-            ],
-        ),
+    #         outputs=[
+    #             ProcessingOutput(
+    #                 output_name="train",
+    #                 source=TRAIN_CSV_PATH,
+    #                 destination=S3_TRAIN_DATA_DESTINATION,
+    #             ),
+    #             ProcessingOutput(
+    #                 output_name="validation",
+    #                 source=VALIDATION_CSV_PATH,
+    #                 destination=S3_VALIDATION_DATA_DESTINATION,
+    #             ),
+    #             ProcessingOutput(
+    #                 output_name="test",
+    #                 source=TEST_CSV_PATH,
+    #                 destination=S3_TEST_DATA_DESTINATION,
+    #             ),
+    #             ProcessingOutput(
+    #                 output_name="model",
+    #                 source=MODEL_FILENAME,
+    #                 destination=S3_MODEL_DESTINATION,
+    #             ),
+    #             ProcessingOutput(
+    #                 output_name="train-baseline",
+    #                 source=TRAIN_BASELINE_CSV_PATH,
+    #                 destination=S3_TRAIN_BASELINE_DATA_DESTINATION,
+    #             ),
+    #             ProcessingOutput(
+    #                 output_name="test-baseline",
+    #                 source=TEST_BASELINE_CSV_PATH,
+    #                 destination=S3_TEST_BASELINE_DATA_DESTINATION,
+    #             ),
+    #         ],
+    #     ),
         cache_config=cache_config,
     )

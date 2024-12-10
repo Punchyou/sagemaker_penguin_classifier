@@ -13,6 +13,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 
+from utils import logging
+
+# TODO: move this to constants
+DATA_DIR = Path("data")
+
+logger = logging.Logger().get_logger()
 
 def get_root_dir() -> Path:
     """
@@ -211,6 +217,8 @@ def split_data(df) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     df_train, temp = train_test_split(df, test_size=0.3)
     df_validation, df_test = train_test_split(temp, test_size=0.5)
+    
+    logger.info(f"Data split into train: {len(df_train)}, validation: {len(df_validation)}, test: {len(df_test)}")
 
     return df_train, df_validation, df_test
 
@@ -240,6 +248,7 @@ def save_baselines(base_directory, df_train, df_test):
         # Exclude the header for the test baseline to avoid prediction issues.
         header = split == "train"
         df.to_csv(baseline_path / f"{split}-baseline.csv", header=header, index=False)
+        logger.info(f"{split.capitalize()} baseline saved to disk")
 
 
 def save_splits(
@@ -290,6 +299,7 @@ def save_splits(
         validation_path / "validation.csv", header=False, index=False
     )
     pd.DataFrame(test).to_csv(test_path / "test.csv", header=False, index=False)
+    logger.info("Splits saved to disk")
 
 
 def save_model(base_directory, target_transformer, features_transformer) -> None:
@@ -322,6 +332,7 @@ def save_model(base_directory, target_transformer, features_transformer) -> None
                 os.path.join(directory, "features.joblib"),
                 arcname="features.joblib",
             )
+    logger.info("Model saved to disk")
 
 
 def preprocess_and_save_data(
@@ -376,3 +387,8 @@ def preprocess_and_save_data(
         y_test,
     )
     save_model(data_dir, target_transformer, features_transformer)
+
+
+if __name__ == "__main__":
+    preprocess_and_save_data(data_dir=DATA_DIR)
+    print("Preprocessing job here from the preprocessor step")
