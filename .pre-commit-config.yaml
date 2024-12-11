@@ -1,0 +1,28 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args: ["--line-length", "79"]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.910
+    hooks:
+      - id: mypy
+        args: ["--ignore-missing-imports"]
+
+  # TODO: enable ruff
+  # - repo: git@github.com:astral-sh/ruff-pre-commit.git
+  #   rev: v0.0.241
+  #   hooks:
+  #     - id: ruff
+  #       args: ["check"]
