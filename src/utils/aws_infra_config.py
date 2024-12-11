@@ -4,7 +4,10 @@ from sagemaker.workflow.pipeline_context import (
     LocalPipelineSession,
     PipelineSession,
 )
+from sagemaker.local import LocalSession
 import sagemaker
+
+from constants import LOCAL_MODE
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -18,7 +21,10 @@ def get_sagemaker_session():
     sagemaker.session.Session
         A SageMaker session object.
     """
-    return sagemaker.session.Session()
+    local_session = LocalSession()
+    local_session.config = {'local': {'local_code': True}}
+
+    return local_session if LOCAL_MODE else sagemaker.session.Session()
 
 
 def get_sagemaker_client():
