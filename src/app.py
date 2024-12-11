@@ -1,7 +1,9 @@
-from preprocess_data.preprocessor import (
-    preprocess_and_save_data,
-)
+import os
+import tempfile
+
+import sagemaker
 from preprocess_data.preprocessing_step import setup_preprocessing_step
+from preprocess_data.preprocessor import preprocess_and_save_data
 from utils.aws_infra_config import (
     get_sagemaker_session,
     get_sm_config_with_local_mode,
@@ -9,12 +11,17 @@ from utils.aws_infra_config import (
     get_iam_client,
     get_region,
 )
-import logging
+from sagemaker.workflow.pipeline_context import (
+    LocalPipelineSession,
+    PipelineSession,
+)
+from sagemaker.workflow.pipeline import Pipeline
+from utils import logging
 
 from constants import AWS_ROLE, LOCAL_MODE, IS_APPLE_M_CHIP, DATA_DIR
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = logging.Logger().get_logger()
+local_pipeline_session = LocalPipelineSession()
 
 
 def main():
@@ -30,12 +37,19 @@ def main():
     region = get_region()
     logger.info("Region: %s", region)
 
-    # preprocess data and set up preproessing step
-    preprocess_and_save_data(data_dir=DATA_DIR)
+    step = setup_preprocessing_step(AWS_ROLE)
 
-    setup_preprocessing_step(AWS_ROLE)
-
-    # Define dataset location parameter
+    # TODO: move this to separate file
+    pipeline = Pipeline(
+        name="preprocessing-only",
+        steps=[step],
+        sagemaker_session=local_pipeline_session,
+    )
+    logger.info("Create pipeline...")
+    pipeline.create(
+        role_arn=sagemaker.get_execution_role(), description="local pipeline example"
+    )
+    logger.info("Pipeline created")
 
 
 if __name__ == "__main__":

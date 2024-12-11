@@ -39,4 +39,4 @@ jobs:
 
     - name: Run linting
       run: |
-        ruff .
+        ruff check
