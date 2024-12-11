@@ -18,7 +18,6 @@ repos:
     rev: v0.910
     hooks:
       - id: mypy
-        entry: mypy --ignore-missing-imports
 
   # TODO: enable ruff
   # - repo: git@github.com:astral-sh/ruff-pre-commit.git
