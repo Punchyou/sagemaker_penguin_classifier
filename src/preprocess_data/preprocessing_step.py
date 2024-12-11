@@ -64,15 +64,12 @@ class FrameworkProcessorWrapper:
             The FrameworkProcessor.
         """
         return FrameworkProcessor(
-            framework_version="0.23-1",
-            image_uri="763104351884.dkr.ecr.us-west-2.amazonaws.com/sagemaker-scikit-learn:0.23-1-cpu-py3",
-            role=self.role,
-            instance_type=self.config["instance_type"],
-            instance_count=self.config["instance_count"],
-            sagemaker_session=self.config["session"],
-            base_job_name="preprocess-data",
-            estimator_cls=SKLearn
-        )
+        estimator_cls=SKLearn,
+        framework_version="1.2-1",
+        role=self.role,
+        instance_type=self.config["instance_type"],
+        instance_count=1,
+    )
 
 
 def setup_preprocessing_step(role: str):
@@ -88,22 +85,22 @@ def setup_preprocessing_step(role: str):
     # Configure caching
     cache_config = CacheConfig(enable_caching=True, expire_after="15d")
 
-    processor = FrameworkProcessor(
-        estimator_cls=SKLearn,
-        framework_version="1.2-1",
-        role=role,
-        instance_type="ml.m5.large",
-        instance_count=1,
-    )
-    # processor = FrameworkProcessorWrapper(role)
-    # process_creator = processor.create_processor()
+    # processor = FrameworkProcessor(
+    #     estimator_cls=SKLearn,
+    #     framework_version="1.2-1",
+    #     role=role,
+    #     instance_type="ml.m5.large",
+    #     instance_count=1,
+    # )
+    processor = FrameworkProcessorWrapper(role)
+    process_creator = processor.create_processor()
 
     return ProcessingStep(
         name="preprocess-data",
-        step_args=processor.run(
-            code="preprocessor.py",
-            source_dir="preprocess_data",
-            dependencies=["constants.py"],),
+        step_args=process_creator.run(
+            code="preprocess_data/preprocessor.py",),
+            # source_dir="src/preprocess_data",
+            # dependencies=["constants.py"],),
         inputs=[
                 ProcessingInput(
                     # s3 location of the data
