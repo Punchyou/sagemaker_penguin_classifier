@@ -2,12 +2,14 @@ from pathlib import Path
 from datetime import datetime
 from sagemaker import Session
 from sagemaker.workflow.parameters import ParameterString
+from sagemaker.local import LocalSession
+
 import os
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # Local config
-LOCAL_MODE = True
+LOCAL_MODE = False
 IS_APPLE_M_CHIP = True
 
 # data
@@ -18,7 +20,7 @@ TEST_CSV_PATH = "/opt/ml/data/test/test.csv"
 TRAIN_BASELINE_CSV_PATH = "/opt/ml/data/train-baseline/train-baseline.csv"
 TEST_BASELINE_CSV_PATH = "/opt/ml/data/test-baseline/test-baseline.csv"
 # Directory for dataset download from S3 to SageMaker container
-INPUT_DIR = "/opt/ml/data/input"
+INPUT_DIR = "/opt/ml/processing/data/penguins.csv"
 
 # model
 EPOCHS = 50
@@ -31,11 +33,15 @@ PREPROCESSING_FILENAME = "preprocess_data/preprocessor.py"
 
 # AWS
 AWS_ROLE = os.getenv("AWS_ROLE")
+
+local_session = LocalSession()
+local_session.config = {'local': {'local_code': True}}
+
 SAGEMAKER_SESSION_CONFIG = {
     "framework_version": "1.2-1",
-    "instance_type": "ml.m5.large",
+    "instance_type": "local" if LOCAL_MODE else "ml.m5.large",
     "instance_count": 1,
-    "session": Session(),
+    "session": local_session if LOCAL_MODE else Session(),
 }
 S3_LOCATION = os.getenv("S3_LOCATION")
 DATASET_LOCATION = ParameterString(
