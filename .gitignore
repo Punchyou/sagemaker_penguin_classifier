@@ -138,7 +138,7 @@ cython_debug/
 *.parquet
 *.pkl
 *.joblib
-/src/data
+/src/data/
 /.devcontainer
 
 # Model files
