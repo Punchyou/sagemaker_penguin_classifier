@@ -12,6 +12,16 @@ A short description of the project.
 - [Contributing](#contributing)
 - [License](#license)
 
+
+### TODO: Add precommit instructions for local
+Notes
+* Install precommit (there is in requirements)
+* Install the hooks: `pre-commit install`
+* Continue with your regular git add and commit flow
+
+### TODO: Add devcontiners instruction for local
+
+
 ## Installation
 
 ### Prerequisites
