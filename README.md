@@ -16,7 +16,7 @@ A short description of the project.
 ### TODO: Add precommit instructions for local
 Notes
 * Install precommit (there is in requirements)
-* Install the hooks: `pre-commit install`
+* Install the hooks: `pre-commit install --hook-type pre-push --hook-type pre-commit`
 * Continue with your regular git add and commit flow
 
 ### TODO: Add devcontiners instruction for local
