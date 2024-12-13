@@ -11,9 +11,9 @@ repos:
     hooks:
       - id: mypy
 
-  # TODO: enable ruff
-  # - repo: git@github.com:astral-sh/ruff-pre-commit.git
-  #   rev: v0.0.241
-  #   hooks:
-  #     - id: ruff
-  #       args: ["check"]
+  - repo: git@github.com:astral-sh/ruff-pre-commit.git
+    rev: v0.0.241
+    hooks:
+      - id: ruff
+        args: ["check"]
+        stages: ["push"]
