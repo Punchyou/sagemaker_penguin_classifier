@@ -88,13 +88,6 @@ def setup_preprocessing_step(role: str):
     # Configure caching
     cache_config = CacheConfig(enable_caching=True, expire_after="15d")
 
-    # processor = FrameworkProcessor(
-    #     estimator_cls=SKLearn,
-    #     framework_version="1.2-1",
-    #     role=role,
-    #     instance_type="ml.m5.large",
-    #     instance_count=1,
-    # )
     processor = FrameworkProcessorWrapper(role)
     process_creator = processor.create_processor()
 
