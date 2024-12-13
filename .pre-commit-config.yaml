@@ -18,3 +18,10 @@ repos:
       - id: ruff
         args: ["check"]
         stages: [pre-push]
+
+  - repo: git@github.com:astral-sh/ruff-pre-commit.git
+    rev: v0.0.241
+    hooks:
+      - id: ruff
+        args: ["format"]
+        stages: [pre-push]
