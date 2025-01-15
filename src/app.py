@@ -1,7 +1,4 @@
-import os
-import tempfile
-
-import sagemaker
+from sagemaker import get_execution_role
 from preprocess_data.preprocessing_step import setup_preprocessing_step
 from preprocess_data.preprocessor import preprocess_and_save_data
 from utils.aws_infra_config import (
@@ -16,11 +13,11 @@ from sagemaker.workflow.pipeline_context import (
     PipelineSession,
 )
 from sagemaker.workflow.pipeline import Pipeline
-from utils import logging
+from utils import logging_utils
 
-from constants import AWS_ROLE, LOCAL_MODE, IS_APPLE_M_CHIP, DATA_DIR
+from constants import AWS_ROLE, LOCAL_MODE, IS_APPLE_M_CHIP
 
-logger = logging.Logger().get_logger()
+logger = logging_utils.Logger().get_logger()
 local_pipeline_session = LocalPipelineSession()
 
 
@@ -47,7 +44,7 @@ def main():
     )
     logger.info("Create pipeline...")
     pipeline.create(
-        role_arn=sagemaker.get_execution_role(), description="local pipeline example"
+        role_arn=get_execution_role(), description="local pipeline example"
     )
     logger.info("Pipeline created")
 

@@ -5,8 +5,8 @@ from sagemaker.sklearn import SKLearn
 from sagemaker.processing import FrameworkProcessor, ProcessingInput, ProcessingOutput
 from sagemaker.workflow.steps import CacheConfig
 from constants import (
-    DATASET_LOCATION,
-    INPUT_DIR,
+    S3_DATASET_LOCATION,
+    INPUT_DATA,
     MODEL_FILENAME,
     PREPROCESSING_FILENAME,
     S3_LOCATION,
@@ -15,16 +15,20 @@ from constants import (
     S3_TEST_DATA_DESTINATION,
     S3_TRAIN_BASELINE_DATA_DESTINATION,
     S3_TRAIN_DATA_DESTINATION,
+    S3_UTILS_LOCATION,
     S3_VALIDATION_DATA_DESTINATION,
     SAGEMAKER_SESSION_CONFIG,
     TEST_BASELINE_CSV_PATH,
     TEST_CSV_PATH,
     TRAIN_BASELINE_CSV_PATH,
     TRAIN_CSV_PATH,
+    UTILS_DIR,
     VALIDATION_CSV_PATH,
 )
 from sagemaker.workflow.steps import ProcessingStep
 from sagemaker.processing import ProcessingInput, ProcessingOutput
+
+from utils.utils import upload_preprocessing_dependencies_to_s3
 
 
 logging.basicConfig(
@@ -84,6 +88,8 @@ def setup_preprocessing_step(role: str):
     role : str
         The IAM role for SageMaker.
     """
+    # upload dependencies to s3
+    upload_preprocessing_dependencies_to_s3()
 
     # Configure caching
     cache_config = CacheConfig(enable_caching=True, expire_after="15d")
@@ -94,16 +100,22 @@ def setup_preprocessing_step(role: str):
     return ProcessingStep(
         name="preprocess-data",
         step_args=process_creator.run(
-            code="preprocess_data/preprocessor.py",
-        ),
+            code="src/preprocess_data/preprocessor.py",
         # source_dir="src/preprocess_data",
-        # dependencies=["constants.py"],),
+            # dependencies=["src/utils/"],),
+        ),
         inputs=[
             ProcessingInput(
                 # s3 location of the data
-                source=DATASET_LOCATION.default_value,
+                source=S3_DATASET_LOCATION.default_value,
                 # where the data will be downloaded for development
-                destination=INPUT_DIR,
+                destination=INPUT_DATA,
+            ),
+            ProcessingInput(
+                # s3 location of the data
+                source=S3_UTILS_LOCATION.default_value,
+                # where the data will be downloaded for development
+                destination=UTILS_DIR,
             ),
         ],
         #         outputs=[

@@ -22,7 +22,7 @@ def get_sagemaker_session():
         A SageMaker session object.
     """
     local_session = LocalSession()
-    local_session.config = {'local': {'local_code': True}}
+    local_session.config = {"local": {"local_code": True}}
 
     return local_session if LOCAL_MODE else sagemaker.session.Session()
 
