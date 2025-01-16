@@ -59,6 +59,28 @@ def upload_file_to_s3(local_path: Union[str, Path], bucket: str, s3_key: str) ->
     logger.info(f"Uploaded {local_path} to s3://{bucket}/{s3_key}")
 
 
+def upload_file_to_s3_if_not_exists(
+    local_path: Union[str, Path], bucket: str, s3_key: str
+) -> None:
+    """
+    Upload a file to an S3 bucket if the file in the bucket doesn't exist. If it exists, skip the upload.
+
+    Parameters
+    ----------
+    local_path : str
+        The local path of the file to upload.
+    bucket : str
+        The name of the S3 bucket.
+    s3_key : str
+        The key of the file in the S3 bucket.
+    """
+    if not bucket:
+        raise ValueError("bucket must be specified.")
+    uploader = S3Uploader()
+    uploader.upload_file_if_not_exists(local_path, bucket, s3_key)
+    logger.info(f"Uploaded {local_path} to s3://{bucket}/{s3_key}")
+
+
 def upload_preprocessing_dependencies_to_s3() -> None:
     """
     Upload the preprocessing dependencies to the specified S3 bucket.
