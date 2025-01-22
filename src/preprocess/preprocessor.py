@@ -1,5 +1,6 @@
 """
-This file is intended to be used in the preprocessing step of the pipeline. It is not intended to be run outside of sageMaker.
+This file is intended to be used in the preprocessing step
+of the pipeline. It is not intended to be run outside of sageMaker.
 """
 
 import os
@@ -18,8 +19,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 
-DATA_DIR = Path("data")
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+INPUT_DATA = "/opt/ml/processing/input"
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
 
 """
@@ -28,6 +31,13 @@ This module is intended to be uploaded to s3 and used in the preprocessing step.
 
 from pathlib import Path
 import pandas as pd
+
+
+def list_directory_tree_with_os_walk(current_script_path):
+    for root, directories, files in os.walk(current_script_path):
+        print(f"Directory: {root}")
+        for file in files:
+            print(f"  File: {file}")
 
 
 def get_root_dir() -> Path:
@@ -59,9 +69,10 @@ def get_data_from_file(data_filepath) -> pd.DataFrame:
     pd.DataFrame
         The data read from the CSV file.
     """
-    root = get_root_dir()
-    path = root / data_filepath
-    return pd.read_csv(path)
+    # root = get_root_dir()
+    # path = root / data_filepath
+    logging.info(f"Reading data from {data_filepath}")
+    return pd.read_csv(data_filepath)
 
 
 def initialize_transformers(
@@ -69,7 +80,7 @@ def initialize_transformers(
     features_columns: List[str] = [
         "island",
     ],
-) -> tuple[ColumnTransformer, ColumnTransformer]:
+) -> tuple:
     """
     Initialize and return the target and feature transformers.
 
@@ -116,7 +127,7 @@ def transform_target(
     df_train: pd.DataFrame,
     df_validation: pd.DataFrame,
     df_test: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple:
     """
     Transform the target variable.
 
@@ -154,7 +165,7 @@ def drop_target(
     df_validation: pd.DataFrame,
     df_test: pd.DataFrame,
     column_name: str,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple:
     """
     Drop the target column from the dataframes.
 
@@ -181,9 +192,7 @@ def drop_target(
     return df_train, df_validation, df_test
 
 
-def transform_features(
-    features_transformer, df_train, df_validation, df_test
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def transform_features(features_transformer, df_train, df_validation, df_test) -> tuple:
     """
     Transform the features.
 
@@ -210,7 +219,7 @@ def transform_features(
     return X_train, X_validation, X_test
 
 
-def split_data(df) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def split_data(df) -> tuple:
     """
     Splits the data into three sets: train, validation, and test.
 
@@ -361,9 +370,14 @@ def preprocess_and_save_data(
         The directory containing the input data and where the processed data
         and models will be saved.
     """
-
+    logging.info(f"Preprocessing data from {data_dir}")
+    logging.info("Current working directory: ", os.getcwd())
+    logging.info(
+        f"List files in /opt/ml/processing/input: {os.listdir('/opt/ml/processing/input')}"
+    )
     data_path = Path(data_dir) / "penguins.csv"
-    df = get_data_from_file(data_filepath=data_path)
+    # TODO: update datapath
+    df = get_data_from_file(data_filepath="/opt/ml/processing/input/data/penguins.csv")
 
     target_transformer, features_transformer = initialize_transformers(
         target_column="species"
@@ -403,5 +417,5 @@ def preprocess_and_save_data(
 
 
 if __name__ == "__main__":
-    preprocess_and_save_data(data_dir=DATA_DIR)
-    print("Preprocessing job here from the preprocessor step")
+    preprocess_and_save_data(data_dir=INPUT_DATA)
+    print("Preprocessing complete")

@@ -16,35 +16,37 @@ class Logger:
         >>> logger.info("This is an info message")
     """
 
-    def __init__(self, name=__name__, level=logging.DEBUG):
+    _logger: None = None
+
+    @staticmethod
+    def get_logger(name=__name__, level=logging.DEBUG):
         """
-        Initializes the Logger with a specified name and logging level.
+        Returns the configured logger instance.
 
         Args:
             name (str): The name of the logger. Defaults to __name__.
             level (int): The logging level. Defaults to logging.DEBUG.
-        """
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
-
-        # Create console handler and set level
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-
-        # Create formatter and add it to the handler
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        ch.setFormatter(formatter)
-
-        # Add the handler to the logger
-        self.logger.addHandler(ch)
-
-    def get_logger(self):
-        """
-        Returns the configured logger instance.
 
         Returns:
             logging.Logger: The configured logger instance.
         """
-        return self.logger
+        if Logger._logger is None:
+            Logger._logger = logging.getLogger(name)
+            Logger._logger.setLevel(level)
+
+            # Check if the logger already has handlers
+            if not Logger._logger.handlers:
+                # Create console handler and set level
+                ch = logging.StreamHandler()
+                ch.setLevel(level)
+
+                # Create formatter and add it to the handler
+                formatter = logging.Formatter(
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                )
+                ch.setFormatter(formatter)
+
+                # Add the handler to the logger
+                Logger._logger.addHandler(ch)
+
+        return Logger._logger

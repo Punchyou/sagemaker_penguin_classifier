@@ -1,6 +1,6 @@
 from sagemaker import get_execution_role
-from preprocess_data.preprocessing_step import setup_preprocessing_step
-from preprocess_data.preprocessor import preprocess_and_save_data
+from preprocess.preprocessor import preprocess_and_save_data
+from preprocess.preprocessor_step import run_processing_job
 from utils.aws_infra_config import (
     get_sagemaker_session,
     get_sm_config_with_local_mode,
@@ -34,7 +34,7 @@ def main():
     region = get_region()
     logger.info("Region: %s", region)
 
-    step = setup_preprocessing_step(AWS_ROLE)
+    step = run_processing_job()
 
     # TODO: move this to separate file
     pipeline = Pipeline(
@@ -43,9 +43,7 @@ def main():
         sagemaker_session=local_pipeline_session,
     )
     logger.info("Create pipeline...")
-    pipeline.create(
-        role_arn=get_execution_role(), description="local pipeline example"
-    )
+    pipeline.create(role_arn=get_execution_role(), description="local pipeline example")
     logger.info("Pipeline created")
 
 

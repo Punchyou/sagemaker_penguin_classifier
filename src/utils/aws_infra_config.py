@@ -1,4 +1,3 @@
-import logging
 import boto3
 from sagemaker.workflow.pipeline_context import (
     LocalPipelineSession,
@@ -8,8 +7,6 @@ from sagemaker.local import LocalSession
 import sagemaker
 
 from constants import LOCAL_MODE
-
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 def get_sagemaker_session():
